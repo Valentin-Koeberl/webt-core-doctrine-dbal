@@ -1,0 +1,19 @@
+{
+    "name": "dreamlabs/core-doctrine-dbal",
+    "description": "Super cool dbal example",
+    "require": {
+        "doctrine/dbal": "^3.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dreamlabs\\CoreDoctrineDbal\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Valentin Köberl",
+            "email": "valentin.koeberl@htl.rennweg.at"
+        }
+    ],
+    "minimum-stability": "stable"
+}
