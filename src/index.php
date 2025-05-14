@@ -187,6 +187,9 @@ try {
 
         <div class="game-rounds">
             <?php
+
+            require_once __DIR__ . '/../vendor/autoload.php';
+            
             $currentRound = null;
             $roundPlayers = [];
             
