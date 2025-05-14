@@ -39,24 +39,38 @@ try {
             throw new Exception('Date and time are required');
         }
 
-        $connection->insert('game_rounds', [
-            'player_name' => $formData['player_name'],
-            'symbol' => $formData['symbol'],
-            'round_number' => $formData['round_number'],
-            'played_at' => $formData['played_at']
-        ]);
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->insert('game_rounds')
+            ->values([
+                'player_name' => ':player_name',
+                'symbol' => ':symbol',
+                'round_number' => ':round_number',
+                'played_at' => ':played_at'
+            ])
+            ->setParameter('player_name', $formData['player_name'])
+            ->setParameter('symbol', $formData['symbol'])
+            ->setParameter('round_number', $formData['round_number'])
+            ->setParameter('played_at', $formData['played_at']);
+
+        $queryBuilder->execute();
 
         $message = 'Game round successfully added!';
         $messageType = 'success';
-        
-        $formData = [
-            'player_name' => '',
-            'symbol' => '',
-            'round_number' => $connection->fetchOne('SELECT COALESCE(MAX(round_number), 0) + 1 FROM game_rounds'),
-            'played_at' => date('Y-m-d\TH:i')
-        ];
+
+        $queryBuilder = $connection->createQueryBuilder();
+        $formData['round_number'] = $queryBuilder->select('COALESCE(MAX(round_number), 0) + 1')
+            ->from('game_rounds')
+            ->execute()
+            ->fetchOne();
+        $formData['player_name'] = '';
+        $formData['symbol'] = '';
+        $formData['played_at'] = date('Y-m-d\TH:i');
     } else {
-        $formData['round_number'] = $connection->fetchOne('SELECT COALESCE(MAX(round_number), 0) + 1 FROM game_rounds');
+        $queryBuilder = $connection->createQueryBuilder();
+        $formData['round_number'] = $queryBuilder->select('COALESCE(MAX(round_number), 0) + 1')
+            ->from('game_rounds')
+            ->execute()
+            ->fetchOne();
     }
 
 } catch (Exception $e) {
@@ -64,6 +78,7 @@ try {
     $messageType = 'error';
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -262,7 +277,7 @@ try {
             <button type="submit">Add Game Round</button>
         </form>
 
-        <a href="../US4/index.php" class="back-link">← Back to Game Rounds</a>
+        <a href="index.php" class="back-link">← Back to Game Rounds</a>
     </div>
 </body>
 </html> 

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Exception;
 
 $config = require __DIR__ . '/database.php';
@@ -12,17 +13,29 @@ try {
 
     if (isset($_GET['delete_id'])) {
         $deleteId = (int)$_GET['delete_id'];
-        $deleted = $connection->delete('game_rounds', ['id' => $deleteId]);
+
+        $queryBuilder = $connection->createQueryBuilder();
+        $deleted = $queryBuilder->delete('game_rounds')
+            ->where('id = :id')
+            ->setParameter('id', $deleteId)
+            ->execute();
+
         $message = $deleted ? 'Record deleted successfully!' : 'Error: Record could not be deleted.';
     }
 
-    $rounds = $connection->fetchAllAssociative('SELECT * FROM game_rounds ORDER BY played_at DESC');
+    $queryBuilder = $connection->createQueryBuilder();
+    $rounds = $queryBuilder->select('*')
+        ->from('game_rounds')
+        ->orderBy('played_at', 'DESC')
+        ->execute()
+        ->fetchAllAssociative();
 
 } catch (Exception $e) {
     $message = 'Error: ' . $e->getMessage();
     $rounds = [];
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
